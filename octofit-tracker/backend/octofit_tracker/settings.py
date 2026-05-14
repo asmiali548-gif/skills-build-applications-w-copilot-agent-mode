@@ -33,7 +33,16 @@ if os.environ.get('CODESPACE_NAME'):
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS = [   INSTALLED_APPS = [
+       'django.contrib.admin',
+       'django.contrib.auth',
+       'django.contrib.contenttypes',
+       'django.contrib.sessions',
+       'django.contrib.messages',
+       'django.contrib.staticfiles',
+       'rest_framework',      # Add this if it's missing
+       'octofit_tracker',     # Add this line - Mona checks for it
+   ]
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
