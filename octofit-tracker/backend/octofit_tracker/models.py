@@ -1,52 +1,94 @@
 from django.db import models
 from django.contrib.auth.models import User
 from djongo import models as djongo_models
-from bson import ObjectId
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class Profile(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
+    user_id = models.CharField(max_length=100)
     bio = models.TextField(blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    height = models.FloatField(null=True, blank=True)  # in cm
-    weight = models.FloatField(null=True, blank=True)  # in kg
+    height = models.FloatField(null=True, blank=True)
+    weight = models.FloatField(null=True, blank=True)
     fitness_goals = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"{self.user.username}'s profile"
+    class Meta:
+        db_table = 'profile'
 
-class Activity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        try:
+            user = User.objects.get(id=self.user_id)
+            return f"{user.username}'s profile"
+        except (User.DoesNotExist, ValueError):
+            return f"Profile for user {self.user_id}"
+
+class Activity(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
+    user_id = models.CharField(max_length=100)
     activity_type = models.CharField(max_length=100)
-    duration = models.IntegerField()  # in minutes
+    duration = models.IntegerField()
     calories_burned = models.FloatField()
     date = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"{self.user.username} - {self.activity_type} on {self.date}"
+    class Meta:
+        db_table = 'activity'
 
-class Team(models.Model):
+    def __str__(self):
+        try:
+            user = User.objects.get(id=self.user_id)
+            return f"{user.username} - {self.activity_type} on {self.date}"
+        except (User.DoesNotExist, ValueError):
+            return f"Activity for user {self.user_id}"
+
+class Team(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    members = models.ManyToManyField(User, related_name='teams')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'team'
 
     def __str__(self):
         return self.name
 
-class Leaderboard(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+class TeamMember(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
+    team_id = models.CharField(max_length=100)
+    user_id = models.CharField(max_length=100)
+
+    class Meta:
+        db_table = 'team_members'
+
+class Leaderboard(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
+    team_id = models.CharField(max_length=100)
+    user_id = models.CharField(max_length=100)
     total_calories = models.FloatField(default=0)
     rank = models.IntegerField()
 
-    def __str__(self):
-        return f"{self.user.username} in {self.team.name} - Rank {self.rank}"
+    class Meta:
+        db_table = 'leaderboard'
 
-class WorkoutSuggestion(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        try:
+            user = User.objects.get(id=self.user_id)
+            return f"{user.username} - Rank {self.rank}"
+        except (User.DoesNotExist, ValueError):
+            return f"Leaderboard entry for user {self.user_id}"
+
+class WorkoutSuggestion(djongo_models.Model):
+    _id = djongo_models.ObjectIdField()
+    user_id = models.CharField(max_length=100)
     suggestion = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'workout_suggestion'
+
     def __str__(self):
-        return f"Suggestion for {self.user.username}"
+        try:
+            user = User.objects.get(id=self.user_id)
+            return f"Suggestion for {user.username}"
+        except (User.DoesNotExist, ValueError):
+            return f"Suggestion for user {self.user_id}"

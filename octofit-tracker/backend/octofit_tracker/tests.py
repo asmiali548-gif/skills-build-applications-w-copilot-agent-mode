@@ -5,24 +5,24 @@ from .models import Profile, Activity, Team
 class ProfileTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
-        self.profile = Profile.objects.create(user=self.user, bio='Test bio')
+        self.profile = Profile.objects.create(user_id=self.user.id, bio='Test bio')
 
     def test_profile_creation(self):
-        self.assertEqual(self.profile.user.username, 'testuser')
+        self.assertEqual(self.profile.user_id, self.user.id)
         self.assertEqual(self.profile.bio, 'Test bio')
 
 class ActivityTestCase(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.activity = Activity.objects.create(
-            user=self.user,
+            user_id=self.user.id,
             activity_type='Running',
             duration=30,
             calories_burned=300
         )
 
     def test_activity_creation(self):
-        self.assertEqual(self.activity.user.username, 'testuser')
+        self.assertEqual(self.activity.user_id, self.user.id)
         self.assertEqual(self.activity.activity_type, 'Running')
         self.assertEqual(self.activity.duration, 30)
 
